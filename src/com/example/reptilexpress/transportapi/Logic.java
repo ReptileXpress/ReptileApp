@@ -1,5 +1,6 @@
 package com.example.reptilexpress.transportapi;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import android.content.Context;
@@ -22,6 +23,9 @@ public class Logic {
 	
 	public List<Arrival> getNearestBuses(final Context ctx) throws Exception {
 		 List<Stop> stopList = BusInformation.getClosestStops(this.getDeviceLocation(ctx));
+		 if (stopList.size() < 1) {
+			 return new ArrayList<Arrival>();
+		 }
 		 return BusInformation.getStopTimetable(stopList.get(0));
 	}
 	
