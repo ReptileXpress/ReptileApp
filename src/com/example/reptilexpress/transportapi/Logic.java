@@ -42,7 +42,6 @@ public class Logic {
 				final LocationListener locationListener = new LocationListener() {
 					@Override
 				    public void onLocationChanged(Location location) {
-						Log.d("Reptile", "LOCATION CHANGED!");
 				        Logic.this.location = location;
 				        locationManager.removeUpdates(this);
 
@@ -67,11 +66,12 @@ public class Logic {
 			}
 		}.start();
 
+		Log.d("Reptile", "Awaiting device location .....");
 		synchronized (locker) {
 			locker.wait();
 		}
 		
-		Log.d("Reptile", "Loc"+location.getLongitude()+" "+location.getLatitude());
+		Log.d("Reptile", "Got location: Long: " + location.getLongitude() + " Lat: " + location.getLatitude());
 		
 		return this.location;
 	}
