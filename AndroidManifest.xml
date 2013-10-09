@@ -25,6 +25,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name="com.example.reptilexpress.BusesAroundActivity"
+            android:label="@string/title_activity_buses_around" >
+        </activity>
+        <activity
+            android:name="com.example.reptilexpress.BusTimetable"
+            android:label="@string/title_activity_bus_timetable" >
+        </activity>
     </application>
 
 </manifest>

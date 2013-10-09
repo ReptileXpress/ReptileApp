@@ -11,5 +11,10 @@ public class Bus {
 		this.operator = operator;
 		this.direction = direction;
 	}
+	
+	@Override
+	public String toString() {
+		return "Bus("+route+", "+operator+", "+direction+")";
+	}
 
 }
