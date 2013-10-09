@@ -1,31 +1,36 @@
 package com.example.reptilexpress;
 
 import java.util.List;
-
-import com.example.reptilexpress.transportapi.Arrival;
-import com.example.reptilexpress.transportapi.Bus;
-import com.example.reptilexpress.transportapi.BusInformation;
-import com.example.reptilexpress.transportapi.Stop;
-
+import android.annotation.SuppressLint;
+import android.app.ListActivity;
+import android.content.Context;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.text.format.Time;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
-import android.app.ListActivity;
-import android.content.Context;
+import com.example.reptilexpress.transportapi.Arrival;
+import com.example.reptilexpress.transportapi.Bus;
+import com.example.reptilexpress.transportapi.BusInformation;
+import com.example.reptilexpress.transportapi.Stop;
 
 public class BusTimetable extends ListActivity {
 	
 	Arrival input;
 	List<Arrival> list;
 
+	@SuppressLint("NewApi")
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_bus_timetable);
+		
+		StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+
+		StrictMode.setThreadPolicy(policy); 
 		
 		Bundle b = getIntent().getExtras();
 		Time t = new Time("GMT");
