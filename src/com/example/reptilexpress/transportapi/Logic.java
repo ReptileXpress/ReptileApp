@@ -17,10 +17,6 @@ public class Logic {
 	Location location;
 	Object locker = new Object();
 	
-	public Logic() {
-		this.busInfo = new BusInformation(); 
-	}
-	
 	public List<Arrival> getNearestBuses(final Context ctx) throws Exception {
 		 List<Stop> stopList = BusInformation.getClosestStops(this.getDeviceLocation(ctx));
 		 if (stopList.size() < 1) {
