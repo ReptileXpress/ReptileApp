@@ -29,6 +29,10 @@ public class Logic {
 		 return BusInformation.getStopTimetable(stopList.get(0));
 	}
 	
+	public static List<Arrival> getBusTimetable(final Arrival arrival) {
+		return BusInformation.getBusTimetable(arrival);
+	}
+	
 	private Location getDeviceLocation(final Context ctx) throws Exception {
 		new Thread() {
 			public void run() {
