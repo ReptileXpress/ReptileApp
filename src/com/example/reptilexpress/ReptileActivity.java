@@ -24,7 +24,13 @@ public class ReptileActivity extends Activity {
 		new Thread() {
 			public void run() {
 				changeLoadingText("Finding nearest buses...");
-				final List<Arrival> list = Logic.getNearestBuses(ReptileActivity.this);	
+				Logic logic = new Logic();
+				List<Arrival> list = null;
+				try {
+					list = logic.getNearestBuses(ReptileActivity.this);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}	
 				changeLoadingText("done");
 				
 				Intent intent = new Intent(ReptileActivity.this, BusesAroundActivity.class);
