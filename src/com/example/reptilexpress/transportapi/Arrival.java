@@ -24,6 +24,11 @@ public class Arrival {
 		this.time = time;
 	}
 	
+	@Override
+	public String toString() {
+		return "Arrival("+bus+"; "+stop+"; "+time+")";
+	}
+	
 
 	
 }
