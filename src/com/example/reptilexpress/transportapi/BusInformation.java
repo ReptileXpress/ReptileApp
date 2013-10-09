@@ -163,7 +163,7 @@ public class BusInformation {
 				final JSONObject arrival = arrivals.getJSONObject(i);
 				result.add(new Arrival(
 						new Bus(arrival.getString("line"), arrival.getString("operator"), arrival.getString("direction")),
-						stop, parseSimpleTime(arrival.getString("best_departure_estimate"))));		
+						stop, parseSimpleTime(arrival.getString("aimed_departure_time"))));		
 			}
 			
 			return result;
