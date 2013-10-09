@@ -19,6 +19,10 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 import android.location.Location;
 import android.net.Uri;
@@ -44,7 +48,11 @@ public class BusInformation {
 		}
 		
 		public static List<Arrival> getBusTimetable(final Arrival arrival) {
-			return null;
+			try {
+				return sharedInstance.busTimetable(arrival);
+			} catch (Exception e) {
+				throw new RuntimeException("Failed getting bus timetable", e);
+			}
 		}
 	
 		/* Unsafe singleton,
@@ -110,8 +118,13 @@ public class BusInformation {
 		}
 		
 		public List<Arrival> stopTimetable(final Stop stop) throws Exception {
+			final Calendar now = Calendar.getInstance(Locale.UK);
+			
 			final Uri url = Uri.parse("http://transportapi.com").buildUpon()
-					.path(String.format("v3/uk/bus/stop/%s/live.json", stop.atcocode))
+					.path(String.format("v3/uk/bus/stop/%s/%s/%s/timetable.json",
+							stop.atcocode,
+							dateFormat.format(now.getTime()),
+							timeFormat.format(now.getTime())))
 					.appendQueryParameter("api_key", apiKey)
 					.appendQueryParameter("app_id", appId)
 					.appendQueryParameter("group", "no")
@@ -156,10 +169,64 @@ public class BusInformation {
 			return result;
 		}
 		
-		public List<Arrival> busTimetable(final Arrival arrival) {
-			return null;
+		public List<Arrival> busTimetable(final Arrival arrival) throws Exception {
+			final Calendar now = Calendar.getInstance(Locale.UK);
+			
+			final Uri url = Uri.parse("http://transportapi.com").buildUpon()
+					.path(String.format("v3/uk/bus/route/%s/%s/inbound/%s/%s/%s/timetable",
+							arrival.bus.operator, arrival.bus.route,
+							arrival.stop.atcocode,
+							dateFormat.format(now.getTime()),
+							timeFormat.format(now.getTime())))
+					.appendQueryParameter("api_key", apiKey)
+					.appendQueryParameter("app_id", appId)
+					.appendQueryParameter("group", "no")
+					.build();
+			Log.d("JSON API", String.format("Requesting %s", url));
+			
+			final HttpResponse response =
+					http.execute(new HttpGet(url.toString()));
+			final StatusLine status = response.getStatusLine();
+			
+			if (status.getStatusCode() != HttpStatus.SC_OK) {
+				response.getEntity().getContent().close();
+				throw new IOException(status.getReasonPhrase());
+			}
+			
+			final Document doc = Jsoup.parse(
+					EntityUtils.toString(response.getEntity()), url.toString());
+			final Element stopList = doc.getElementById("busroutelist");
+			final Elements stopListItems = stopList.getElementsByTag("li");
+			
+			ArrayList<Arrival> result = new ArrayList<Arrival>();
+			for (Element stopListItem : stopListItems) {
+				String destcode;
+				String destname;
+				Time desttime;
+				
+				Element timeElement = stopListItem.getElementsByClass("routelist-time").first();
+				desttime = parseSimpleTime(timeElement.text().substring(0, 5));
+				
+				Element destElement = stopListItem.getElementsByClass("routelist-destination").first();
+				String href = destElement.getElementsByTag("a").first().attr("href");
+				destcode = href;
+				if (destcode.startsWith("/v3/uk/bus/stop/")) {
+					destcode = destcode.substring("/v3/uk/bus/stop/".length());
+				}
+				if (destcode.indexOf('/') > 0) {
+					destcode = destcode.substring(0, destcode.indexOf('/'));
+				}
+			
+				destname = destElement.text();
+				
+				result.add(new Arrival(
+						arrival.bus, new Stop(destcode, destname), desttime));
+			}
+			return result;
 		}
 		
+		private static final SimpleDateFormat dateFormat =
+				new SimpleDateFormat("yyyy-MM-dd", Locale.UK);
 		private static final SimpleDateFormat timeFormat =
 				new SimpleDateFormat("HH:mm", Locale.UK);
 		
