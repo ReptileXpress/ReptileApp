@@ -1,9 +1,6 @@
 package com.example.reptilexpress.transportapi;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.CharBuffer;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -18,6 +15,7 @@ import org.apache.http.StatusLine;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -25,6 +23,7 @@ import org.json.JSONObject;
 import android.location.Location;
 import android.net.Uri;
 import android.text.format.Time;
+import android.util.Log;
 
 public class BusInformation {
 
@@ -52,7 +51,7 @@ public class BusInformation {
 		 *   but it doesn't matter if we accidentally (or deliberately)
 		 *   create more than one instance. */
 		private static BusInformation sharedInstance =
-				new BusInformation("api_key", "app_id");
+				new BusInformation("56189ff394e20f89ed61a4bf32f1c065", "525bfde7");
 		
 		private final String apiKey;
 		private final String appId;
@@ -75,6 +74,8 @@ public class BusInformation {
 					.appendQueryParameter("rpp", String.valueOf(numberOfClosestStops))
 					.appendQueryParameter("page", String.valueOf(1))
 					.build();
+			Log.d("JSON API", String.format("Requesting %s", url));
+			
 			
 			final HttpResponse response =
 					http.execute(new HttpGet(url.toString()));
@@ -87,13 +88,9 @@ public class BusInformation {
 			
 			final JSONArray stops;
 			{
-				final CharBuffer buffer = CharBuffer.allocate(
-						Integer.MAX_VALUE & ((int) response.getEntity().getContentLength()));
-				final InputStream data = response.getEntity().getContent();
-				final InputStreamReader text = new InputStreamReader(data, "UTF-8");
-				while (text.read(buffer) > 0);
 				try {
-					stops = new JSONObject(buffer.toString()).getJSONArray("stops");
+					stops = new JSONObject(EntityUtils.toString(response.getEntity()))
+						.getJSONArray("stops");
 				} catch (JSONException e) {
 					throw new Exception("Request returned invalid JSON", e);
 				}
@@ -114,11 +111,12 @@ public class BusInformation {
 		
 		public List<Arrival> stopTimetable(final Stop stop) throws Exception {
 			final Uri url = Uri.parse("http://transportapi.com").buildUpon()
-					.path("v3/uk/bus/stop/atcocode/live.json")
+					.path(String.format("v3/uk/bus/stop/%s/live.json", stop.atcocode))
 					.appendQueryParameter("api_key", apiKey)
 					.appendQueryParameter("app_id", appId)
 					.appendQueryParameter("group", "no")
 					.build();
+			Log.d("JSON API", String.format("Requesting %s", url));
 			
 			final HttpResponse response =
 					http.execute(new HttpGet(url.toString()));
@@ -131,13 +129,8 @@ public class BusInformation {
 			
 			final JSONArray arrivals;
 			{
-				final CharBuffer buffer = CharBuffer.allocate(
-						Integer.MAX_VALUE & ((int) response.getEntity().getContentLength()));
-				final InputStream data = response.getEntity().getContent();
-				final InputStreamReader text = new InputStreamReader(data, "UTF-8");
-				while (text.read(buffer) > 0);
 				try {
-					JSONObject root = new JSONObject(buffer.toString());
+					JSONObject root = new JSONObject(EntityUtils.toString(response.getEntity()));
 					root = root.getJSONObject("departures");
 					if (root == null)
 						throw new Exception("Request returned invalid JSON (data missing)");
