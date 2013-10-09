@@ -44,6 +44,8 @@ public class Logic {
 				    public void onLocationChanged(Location location) {
 						Log.d("Reptile", "LOCATION CHANGED!");
 				        Logic.this.location = location;
+				        locationManager.removeUpdates(this);
+
 				        synchronized (locker) {
 				        	locker.notify();
 				        }
