@@ -195,7 +195,7 @@ public class BusInformation {
 			
 			final Document doc = Jsoup.parse(
 					EntityUtils.toString(response.getEntity()), url.toString());
-			final Element stopList = doc.getElementById("busroutelist");
+			final Element stopList = doc.getElementsByClass("busroutelist").first();
 			final Elements stopListItems = stopList.getElementsByTag("li");
 			
 			ArrayList<Arrival> result = new ArrayList<Arrival>();
